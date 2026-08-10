@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Loan Management System Business/Loan Management System Business.csproj" />
+  <Project Path="Loan Management System Data/Loan Management System Data.csproj" />
+  <Project Path="Loan Management System/Loan Management System.csproj" />
+</Solution>
