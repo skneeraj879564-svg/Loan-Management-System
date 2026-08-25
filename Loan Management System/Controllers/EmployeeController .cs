@@ -1,7 +1,6 @@
-﻿using Loan_Management_System_Business.Dtos;
+﻿using Loan_Management_System_Business.Dtos.Employee;
 using Loan_Management_System_Business.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -20,10 +19,11 @@ namespace Loan_Management_System.Controllers
             _employeeService = employeeService;
         }
 
-        // ==========================================
+
+        // =====================================================
         // GET ALL EMPLOYEES
-        // GET: api/Employee
-        // ==========================================
+        // ADMIN ONLY
+        // =====================================================
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
@@ -36,12 +36,12 @@ namespace Loan_Management_System.Controllers
         }
 
 
-        // ==========================================
+        // =====================================================
         // GET EMPLOYEE BY ID
-        // GET: api/Employee/1
-        // ==========================================
+        // ADMIN ONLY
+        // =====================================================
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -60,10 +60,10 @@ namespace Loan_Management_System.Controllers
         }
 
 
-        // ==========================================
+        // =====================================================
         // GET MY PROFILE
-        // GET: api/Employee/my-profile
-        // ==========================================
+        // ADMIN / LOAN OFFICER / COLLECTION OFFICER
+        // =====================================================
 
         [HttpGet("my-profile")]
         [Authorize(Roles = "Admin,LoanOfficer,CollectionOfficer")]
@@ -97,10 +97,10 @@ namespace Loan_Management_System.Controllers
         }
 
 
-        // ==========================================
+        // =====================================================
         // CREATE EMPLOYEE
-        // POST: api/Employee
-        // ==========================================
+        // ADMIN ONLY
+        // =====================================================
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
@@ -117,18 +117,26 @@ namespace Loan_Management_System.Controllers
 
             return CreatedAtAction(
                 nameof(GetById),
-                new { id = employee.EmployeeId },
+                new
+                {
+                    id = employee.EmployeeId
+                },
                 employee);
         }
 
 
-        // ==========================================
+        // =====================================================
         // UPDATE EMPLOYEE
-        // PUT: api/Employee/1
-        // ==========================================
+        //
+        // ADMIN:
+        // Can update anyone
+        //
+        // LOAN OFFICER / COLLECTION OFFICER:
+        // Can update ONLY their own profile
+        // =====================================================
 
-        [HttpPut("{id}")]
-        [Authorize(Roles = "Admin")]
+        [HttpPut("{id:int}")]
+        [Authorize(Roles = "Admin,LoanOfficer,CollectionOfficer")]
         public async Task<IActionResult> Update(
             int id,
             CreateEmployeeDto model)
@@ -138,11 +146,69 @@ namespace Loan_Management_System.Controllers
                 return BadRequest(ModelState);
             }
 
-            var employee =
+
+            // =================================================
+            // ADMIN
+            // =================================================
+
+            if (User.IsInRole("Admin"))
+            {
+                var employee =
+                    await _employeeService
+                        .UpdateAsync(id, model);
+
+                if (employee == null)
+                {
+                    return NotFound(new
+                    {
+                        message = "Employee not found."
+                    });
+                }
+
+                return Ok(employee);
+            }
+
+
+            // =================================================
+            // LOAN OFFICER / COLLECTION OFFICER
+            // OWN PROFILE ONLY
+            // =================================================
+
+            var userId =
+                User.FindFirstValue(
+                    ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized(new
+                {
+                    message = "User is not authenticated."
+                });
+            }
+
+            var ownEmployee =
+                await _employeeService
+                    .GetMyProfileAsync(userId);
+
+            if (ownEmployee == null)
+            {
+                return NotFound(new
+                {
+                    message = "Employee profile not found."
+                });
+            }
+
+            // Prevent updating another employee
+            if (ownEmployee.EmployeeId != id)
+            {
+                return Forbid();
+            }
+
+            var updatedEmployee =
                 await _employeeService
                     .UpdateAsync(id, model);
 
-            if (employee == null)
+            if (updatedEmployee == null)
             {
                 return NotFound(new
                 {
@@ -150,21 +216,22 @@ namespace Loan_Management_System.Controllers
                 });
             }
 
-            return Ok(employee);
+            return Ok(updatedEmployee);
         }
 
 
-        // ==========================================
+        // =====================================================
         // DELETE EMPLOYEE
-        // DELETE: api/Employee/1
-        // ==========================================
+        // ADMIN ONLY
+        // =====================================================
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
             var deleted =
-                await _employeeService.DeleteAsync(id);
+                await _employeeService
+                    .DeleteAsync(id);
 
             if (!deleted)
             {

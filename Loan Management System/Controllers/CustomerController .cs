@@ -1,7 +1,6 @@
-﻿using Loan_Management_System_Business.Dtos;
+﻿using Loan_Management_System_Business.Dtos.Customer;
 using Loan_Management_System_Business.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -20,37 +19,92 @@ namespace Loan_Management_System.Controllers
             _customerService = customerService;
         }
 
-        // =========================
+
+        // =====================================================
         // GET CUSTOMER BY ID
-        // =========================
+        // =====================================================
 
         [HttpGet("{customerId:int}")]
         public async Task<IActionResult> GetById(int customerId)
         {
-            var customer =
-                await _customerService.GetByIdAsync(customerId);
+            // ================================================
+            // ADMIN / LOAN OFFICER
+            // Can view any customer
+            // ================================================
 
-            if (customer == null)
+            if (User.IsInRole("Admin") ||
+                User.IsInRole("LoanOfficer"))
             {
-                return NotFound(new
+                var customer =
+                    await _customerService.GetByIdAsync(customerId);
+
+                if (customer == null)
                 {
-                    message = "Customer not found."
-                });
+                    return NotFound(new
+                    {
+                        message = "Customer not found."
+                    });
+                }
+
+                return Ok(customer);
             }
 
-            return Ok(customer);
+
+            // ================================================
+            // CUSTOMER
+            // Can view ONLY own customer profile
+            // ================================================
+
+            if (User.IsInRole("Customer"))
+            {
+                var userId =
+                    User.FindFirstValue(
+                        ClaimTypes.NameIdentifier);
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(new
+                    {
+                        message = "User is not authenticated."
+                    });
+                }
+
+                var ownCustomer =
+                    await _customerService
+                        .GetByUserIdAsync(userId);
+
+                if (ownCustomer == null)
+                {
+                    return NotFound(new
+                    {
+                        message = "Customer profile not found."
+                    });
+                }
+
+                if (ownCustomer.CustomerId != customerId)
+                {
+                    return Forbid();
+                }
+
+                return Ok(ownCustomer);
+            }
+
+
+            return Forbid();
         }
 
 
-        // =========================
+        // =====================================================
         // GET MY PROFILE
-        // =========================
+        // =====================================================
 
         [HttpGet("my-profile")]
+        [Authorize(Roles = "Customer")]
         public async Task<IActionResult> GetMyProfile()
         {
             var userId =
-                User.FindFirstValue(ClaimTypes.NameIdentifier);
+                User.FindFirstValue(
+                    ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrEmpty(userId))
             {
@@ -61,7 +115,8 @@ namespace Loan_Management_System.Controllers
             }
 
             var customer =
-                await _customerService.GetByUserIdAsync(userId);
+                await _customerService
+                    .GetByUserIdAsync(userId);
 
             if (customer == null)
             {
@@ -75,9 +130,9 @@ namespace Loan_Management_System.Controllers
         }
 
 
-        // =========================
+        // =====================================================
         // GET ALL CUSTOMERS
-        // =========================
+        // =====================================================
 
         [HttpGet]
         [Authorize(Roles = "Admin,LoanOfficer")]
@@ -90,16 +145,18 @@ namespace Loan_Management_System.Controllers
         }
 
 
-        // =========================
+        // =====================================================
         // CREATE CUSTOMER
-        // =========================
+        // =====================================================
 
         [HttpPost]
+        [Authorize(Roles = "Admin,LoanOfficer,Customer")]
         public async Task<IActionResult> Create(
             CreateCustomerDto model)
         {
             var userId =
-                User.FindFirstValue(ClaimTypes.NameIdentifier);
+                User.FindFirstValue(
+                    ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrEmpty(userId))
             {
@@ -116,40 +173,109 @@ namespace Loan_Management_System.Controllers
 
             return CreatedAtAction(
                 nameof(GetById),
-                new { customerId = customer.CustomerId },
+                new
+                {
+                    customerId = customer.CustomerId
+                },
                 customer);
         }
 
 
-        // =========================
+        // =====================================================
         // UPDATE CUSTOMER
-        // =========================
+        // =====================================================
 
         [HttpPut("{customerId:int}")]
+        [Authorize(Roles = "Admin,LoanOfficer,Customer")]
         public async Task<IActionResult> Update(
             int customerId,
             UpdateCustomerDto model)
         {
-            var customer =
-                await _customerService.UpdateAsync(
-                    customerId,
-                    model);
+            // ================================================
+            // ADMIN / LOAN OFFICER
+            // Can update any customer
+            // ================================================
 
-            if (customer == null)
+            if (User.IsInRole("Admin") ||
+                User.IsInRole("LoanOfficer"))
             {
-                return NotFound(new
+                var customer =
+                    await _customerService.UpdateAsync(
+                        customerId,
+                        model);
+
+                if (customer == null)
                 {
-                    message = "Customer not found."
-                });
+                    return NotFound(new
+                    {
+                        message = "Customer not found."
+                    });
+                }
+
+                return Ok(customer);
             }
 
-            return Ok(customer);
+
+            // ================================================
+            // CUSTOMER
+            // Can update ONLY own profile
+            // ================================================
+
+            if (User.IsInRole("Customer"))
+            {
+                var userId =
+                    User.FindFirstValue(
+                        ClaimTypes.NameIdentifier);
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Unauthorized(new
+                    {
+                        message = "User is not authenticated."
+                    });
+                }
+
+                var ownCustomer =
+                    await _customerService
+                        .GetByUserIdAsync(userId);
+
+                if (ownCustomer == null)
+                {
+                    return NotFound(new
+                    {
+                        message = "Customer profile not found."
+                    });
+                }
+
+                if (ownCustomer.CustomerId != customerId)
+                {
+                    return Forbid();
+                }
+
+                var updatedCustomer =
+                    await _customerService.UpdateAsync(
+                        customerId,
+                        model);
+
+                if (updatedCustomer == null)
+                {
+                    return NotFound(new
+                    {
+                        message = "Customer not found."
+                    });
+                }
+
+                return Ok(updatedCustomer);
+            }
+
+
+            return Forbid();
         }
 
 
-        // =========================
+        // =====================================================
         // DELETE CUSTOMER
-        // =========================
+        // =====================================================
 
         [HttpDelete("{customerId:int}")]
         [Authorize(Roles = "Admin")]

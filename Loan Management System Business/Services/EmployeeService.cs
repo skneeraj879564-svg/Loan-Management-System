@@ -1,7 +1,7 @@
-﻿using Loan_Management_System_Business.Dtos;
+﻿using Loan_Management_System_Business.Dtos.Employee;
 using Loan_Management_System_Business.Interfaces;
 using Loan_Management_System_Data.Models;
-using Loan_Management_System_Data.Repositories;
+using Loan_Management_System_Data.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;

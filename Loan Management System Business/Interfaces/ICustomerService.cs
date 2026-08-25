@@ -1,4 +1,4 @@
-﻿using Loan_Management_System_Business.Dtos;
+﻿using Loan_Management_System_Business.Dtos.Customer;
 using System;
 using System.Collections.Generic;
 using System.Linq;

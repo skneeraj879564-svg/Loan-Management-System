@@ -23,4 +23,8 @@
     <ProjectReference Include="..\Loan Management System Business\Loan Management System Business.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Uploads\LoanDocuments\" />
+  </ItemGroup>
+
 </Project>

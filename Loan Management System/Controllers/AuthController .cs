@@ -1,4 +1,5 @@
 ﻿using Loan_Management_System_Business.Dtos;
+using Loan_Management_System_Business.Dtos.Authentication;
 using Loan_Management_System_Business.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -23,15 +24,19 @@ namespace Loan_Management_System.Controllers
         // REGISTER
         // POST: api/Auth/register
         // ==========================================
+
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterDto model)
+        [AllowAnonymous]
+        public async Task<IActionResult> Register(
+            RegisterDto model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var result = await _authService.RegisterAsync(model);
+            var result =
+                await _authService.RegisterAsync(model);
 
             if (result != "Registration successful.")
             {
@@ -52,15 +57,19 @@ namespace Loan_Management_System.Controllers
         // LOGIN
         // POST: api/Auth/login
         // ==========================================
+
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginDto model)
+        [AllowAnonymous]
+        public async Task<IActionResult> Login(
+            LoginDto model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var result = await _authService.LoginAsync(model);
+            var result =
+                await _authService.LoginAsync(model);
 
             if (result == null)
             {
@@ -78,8 +87,9 @@ namespace Loan_Management_System.Controllers
         // FORGOT PASSWORD
         // POST: api/Auth/forgot-password
         // ==========================================
-        
+
         [HttpPost("forgot-password")]
+        [AllowAnonymous]
         public async Task<IActionResult> ForgotPassword(
             ForgotPasswordDto model)
         {
@@ -99,9 +109,43 @@ namespace Loan_Management_System.Controllers
 
 
         // ==========================================
+        // RESET PASSWORD
+        // POST: api/Auth/reset-password
+        // ==========================================
+
+        [HttpPost("reset-password")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ResetPassword(
+            ResetPasswordDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result =
+                await _authService.ResetPasswordAsync(model);
+
+            if (result != "Password reset successfully.")
+            {
+                return BadRequest(new
+                {
+                    message = result
+                });
+            }
+
+            return Ok(new
+            {
+                message = result
+            });
+        }
+
+
+        // ==========================================
         // CHANGE PASSWORD
         // POST: api/Auth/change-password
         // ==========================================
+
         [Authorize]
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword(
@@ -114,7 +158,8 @@ namespace Loan_Management_System.Controllers
 
             // User ID JWT claim se milegi
             var userId =
-                User.FindFirstValue(ClaimTypes.NameIdentifier);
+                User.FindFirstValue(
+                    ClaimTypes.NameIdentifier);
 
             if (string.IsNullOrEmpty(userId))
             {

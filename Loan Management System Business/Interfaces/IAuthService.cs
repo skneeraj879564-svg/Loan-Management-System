@@ -1,22 +1,28 @@
-﻿using Loan_Management_System_Business.Dtos;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Loan_Management_System_Business.Dtos.Authentication;
 
 namespace Loan_Management_System_Business.Interfaces
 {
     public interface IAuthService
     {
-        Task<string> RegisterAsync(RegisterDto model);
+        // REGISTER
+        Task<string> RegisterAsync(
+            RegisterDto model);
 
-        Task<LoginResponseDto?> LoginAsync(LoginDto model);
+        // LOGIN
+        Task<LoginResponseDto?> LoginAsync(
+            LoginDto model);
 
-        Task<string> ForgotPasswordAsync(ForgotPasswordDto model);
+        // FORGOT PASSWORD
+        Task<string> ForgotPasswordAsync(
+            ForgotPasswordDto model);
 
+        // CHANGE PASSWORD
         Task<string> ChangePasswordAsync(
             string userId,
             ChangePasswordDto model);
+
+        // RESET PASSWORD
+        Task<string> ResetPasswordAsync(
+            ResetPasswordDto model);
     }
 }

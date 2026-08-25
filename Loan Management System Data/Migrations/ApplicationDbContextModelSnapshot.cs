@@ -426,6 +426,58 @@ namespace Loan_Management_System_Data.Migrations
                     b.ToTable("EmploymentDetails");
                 });
 
+            modelBuilder.Entity("Loan_Management_System_Data.Models.Foreclosure", b =>
+                {
+                    b.Property<int>("ForeclosureId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ForeclosureId"));
+
+                    b.Property<decimal>("ForeclosureCharges")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("ForeclosureDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("InterestAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("LoanApplicationId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("OutstandingPrincipal")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("PaidDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("PenaltyAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("ForeclosureId");
+
+                    b.HasIndex("LoanApplicationId");
+
+                    b.ToTable("Foreclosures");
+                });
+
             modelBuilder.Entity("Loan_Management_System_Data.Models.KycDocument", b =>
                 {
                     b.Property<int>("KycDocumentId")
@@ -476,6 +528,269 @@ namespace Loan_Management_System_Data.Migrations
                     b.ToTable("KycDocuments");
                 });
 
+            modelBuilder.Entity("Loan_Management_System_Data.Models.Loan", b =>
+                {
+                    b.Property<int>("LoanId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LoanId"));
+
+                    b.Property<decimal>("ApprovedAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("InterestRate")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<int>("LoanApplicationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("LoanNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("OutstandingAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("ProcessingFee")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<int>("TenureMonths")
+                        .HasColumnType("int");
+
+                    b.HasKey("LoanId");
+
+                    b.HasIndex("LoanApplicationId")
+                        .IsUnique();
+
+                    b.ToTable("Loans");
+                });
+
+            modelBuilder.Entity("Loan_Management_System_Data.Models.LoanApplication", b =>
+                {
+                    b.Property<int>("LoanApplicationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LoanApplicationId"));
+
+                    b.Property<DateTime>("ApplicationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ApprovalDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ApprovedByEmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LoanProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Purpose")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("RequestedAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("RequestedTenureMonths")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("LoanApplicationId");
+
+                    b.HasIndex("ApprovedByEmployeeId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("LoanProductId");
+
+                    b.ToTable("LoanApplications");
+                });
+
+            modelBuilder.Entity("Loan_Management_System_Data.Models.LoanDocument", b =>
+                {
+                    b.Property<int>("LoanDocumentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LoanDocumentId"));
+
+                    b.Property<string>("ContentType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("DocumentName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("DocumentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<long>("FileSize")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("LoanApplicationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StoredFileName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime>("UploadedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("VerificationRemarks")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("VerificationStatus")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<int?>("VerifiedByEmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("VerifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("LoanDocumentId");
+
+                    b.HasIndex("LoanApplicationId");
+
+                    b.HasIndex("VerifiedByEmployeeId");
+
+                    b.ToTable("LoanDocuments");
+                });
+
+            modelBuilder.Entity("Loan_Management_System_Data.Models.LoanProduct", b =>
+                {
+                    b.Property<int>("LoanProductId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LoanProductId"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<decimal>("InterestRate")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("MaximumAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("MaximumTenureMonths")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("MinimumAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("MinimumTenureMonths")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("LoanProductId");
+
+                    b.ToTable("LoanProducts");
+                });
+
+            modelBuilder.Entity("Loan_Management_System_Data.Models.LoanRepayment", b =>
+                {
+                    b.Property<int>("LoanRepaymentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LoanRepaymentId"));
+
+                    b.Property<DateTime>("DueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("EMIAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("InstallmentNumber")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("InterestAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("LoanApplicationId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PaidAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("PaymentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("PrincipalAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("LoanRepaymentId");
+
+                    b.HasIndex("LoanApplicationId");
+
+                    b.ToTable("LoanRepayments");
+                });
+
             modelBuilder.Entity("Loan_Management_System_Data.Models.Nominee", b =>
                 {
                     b.Property<int>("NomineeId")
@@ -518,6 +833,181 @@ namespace Loan_Management_System_Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Nominees");
+                });
+
+            modelBuilder.Entity("Loan_Management_System_Data.Models.Notification", b =>
+                {
+                    b.Property<int>("NotificationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationId"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime?>("ReadDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("NotificationId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("Loan_Management_System_Data.Models.Payment", b =>
+                {
+                    b.Property<int>("PaymentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentId"));
+
+                    b.Property<int>("LoanApplicationId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LoanRepaymentId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PaymentAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Remarks")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TransactionId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PaymentId");
+
+                    b.HasIndex("LoanApplicationId");
+
+                    b.HasIndex("LoanRepaymentId");
+
+                    b.ToTable("Payments");
+                });
+
+            modelBuilder.Entity("Loan_Management_System_Data.Models.Penalty", b =>
+                {
+                    b.Property<int>("PenaltyId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PenaltyId"));
+
+                    b.Property<int>("LoanApplicationId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LoanRepaymentId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("PaidDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("PenaltyAmount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("PenaltyDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("PenaltyId");
+
+                    b.HasIndex("LoanApplicationId");
+
+                    b.HasIndex("LoanRepaymentId");
+
+                    b.ToTable("Penalties");
+                });
+
+            modelBuilder.Entity("Loan_Management_System_Data.Models.VerificationHistory", b =>
+                {
+                    b.Property<int>("VerificationHistoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VerificationHistoryId"));
+
+                    b.Property<int?>("CreditScore")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EmployeeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LoanApplicationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Remarks")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTime>("VerificationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("VerificationType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("VerificationHistoryId");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("LoanApplicationId");
+
+                    b.ToTable("VerificationHistories");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -715,6 +1205,17 @@ namespace Loan_Management_System_Data.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("Loan_Management_System_Data.Models.Foreclosure", b =>
+                {
+                    b.HasOne("Loan_Management_System_Data.Models.LoanApplication", "LoanApplication")
+                        .WithMany()
+                        .HasForeignKey("LoanApplicationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("LoanApplication");
+                });
+
             modelBuilder.Entity("Loan_Management_System_Data.Models.KycDocument", b =>
                 {
                     b.HasOne("Loan_Management_System_Data.Models.Customer", "Customer")
@@ -726,6 +1227,70 @@ namespace Loan_Management_System_Data.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("Loan_Management_System_Data.Models.Loan", b =>
+                {
+                    b.HasOne("Loan_Management_System_Data.Models.LoanApplication", "LoanApplication")
+                        .WithOne("Loan")
+                        .HasForeignKey("Loan_Management_System_Data.Models.Loan", "LoanApplicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LoanApplication");
+                });
+
+            modelBuilder.Entity("Loan_Management_System_Data.Models.LoanApplication", b =>
+                {
+                    b.HasOne("Loan_Management_System_Data.Models.EmployeeProfile", "ApprovedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("ApprovedByEmployeeId");
+
+                    b.HasOne("Loan_Management_System_Data.Models.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Loan_Management_System_Data.Models.LoanProduct", "LoanProduct")
+                        .WithMany()
+                        .HasForeignKey("LoanProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ApprovedByEmployee");
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("LoanProduct");
+                });
+
+            modelBuilder.Entity("Loan_Management_System_Data.Models.LoanDocument", b =>
+                {
+                    b.HasOne("Loan_Management_System_Data.Models.LoanApplication", "LoanApplication")
+                        .WithMany("LoanDocuments")
+                        .HasForeignKey("LoanApplicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Loan_Management_System_Data.Models.EmployeeProfile", "VerifiedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("VerifiedByEmployeeId");
+
+                    b.Navigation("LoanApplication");
+
+                    b.Navigation("VerifiedByEmployee");
+                });
+
+            modelBuilder.Entity("Loan_Management_System_Data.Models.LoanRepayment", b =>
+                {
+                    b.HasOne("Loan_Management_System_Data.Models.LoanApplication", "LoanApplication")
+                        .WithMany("LoanRepayments")
+                        .HasForeignKey("LoanApplicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LoanApplication");
+                });
+
             modelBuilder.Entity("Loan_Management_System_Data.Models.Nominee", b =>
                 {
                     b.HasOne("Loan_Management_System_Data.Models.Customer", "Customer")
@@ -735,6 +1300,63 @@ namespace Loan_Management_System_Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("Loan_Management_System_Data.Models.Payment", b =>
+                {
+                    b.HasOne("Loan_Management_System_Data.Models.LoanApplication", "LoanApplication")
+                        .WithMany()
+                        .HasForeignKey("LoanApplicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Loan_Management_System_Data.Models.LoanRepayment", "LoanRepayment")
+                        .WithMany()
+                        .HasForeignKey("LoanRepaymentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("LoanApplication");
+
+                    b.Navigation("LoanRepayment");
+                });
+
+            modelBuilder.Entity("Loan_Management_System_Data.Models.Penalty", b =>
+                {
+                    b.HasOne("Loan_Management_System_Data.Models.LoanApplication", "LoanApplication")
+                        .WithMany()
+                        .HasForeignKey("LoanApplicationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Loan_Management_System_Data.Models.LoanRepayment", "LoanRepayment")
+                        .WithMany()
+                        .HasForeignKey("LoanRepaymentId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("LoanApplication");
+
+                    b.Navigation("LoanRepayment");
+                });
+
+            modelBuilder.Entity("Loan_Management_System_Data.Models.VerificationHistory", b =>
+                {
+                    b.HasOne("Loan_Management_System_Data.Models.EmployeeProfile", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Loan_Management_System_Data.Models.LoanApplication", "LoanApplication")
+                        .WithMany("VerificationHistories")
+                        .HasForeignKey("LoanApplicationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("LoanApplication");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -804,6 +1426,17 @@ namespace Loan_Management_System_Data.Migrations
                     b.Navigation("KycDocuments");
 
                     b.Navigation("Nominee");
+                });
+
+            modelBuilder.Entity("Loan_Management_System_Data.Models.LoanApplication", b =>
+                {
+                    b.Navigation("Loan");
+
+                    b.Navigation("LoanDocuments");
+
+                    b.Navigation("LoanRepayments");
+
+                    b.Navigation("VerificationHistories");
                 });
 #pragma warning restore 612, 618
         }

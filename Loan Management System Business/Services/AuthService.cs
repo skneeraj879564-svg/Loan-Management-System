@@ -1,7 +1,7 @@
-﻿using Loan_Management_System_Business.Dtos;
+﻿using Loan_Management_System_Business.Dtos.Authentication;
 using Loan_Management_System_Business.Interfaces;
 using Loan_Management_System_Data.Models;
-using Loan_Management_System_Data.Repositories;
+using Loan_Management_System_Data.Repositories.Interfaces;
 using Microsoft.AspNetCore.Identity;
 
 namespace Loan_Management_System_Business.Services
@@ -11,32 +11,37 @@ namespace Loan_Management_System_Business.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IAuthRepository _authRepository;
         private readonly IJwtService _jwtService;
+        private readonly IEmailService _emailService;
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
             IAuthRepository authRepository,
-            IJwtService jwtService)
+            IJwtService jwtService,
+            IEmailService emailService)
         {
             _userManager = userManager;
             _authRepository = authRepository;
             _jwtService = jwtService;
+            _emailService = emailService;
         }
+
 
         // =========================
         // REGISTER
         // =========================
-        public async Task<string> RegisterAsync(RegisterDto model)
+
+        public async Task<string> RegisterAsync(
+            RegisterDto model)
         {
-            // Check email already exists
             var existingUser =
-                await _authRepository.GetUserByEmailAsync(model.Email);
+                await _authRepository
+                    .GetUserByEmailAsync(model.Email);
 
             if (existingUser != null)
             {
                 return "Email already registered.";
             }
 
-            // Create ApplicationUser
             var user = new ApplicationUser
             {
                 FullName = model.FullName,
@@ -44,30 +49,32 @@ namespace Loan_Management_System_Business.Services
                 Email = model.Email
             };
 
-            // Create user using Identity
-            var result = await _userManager.CreateAsync(
-                user,
-                model.Password);
+            var result =
+                await _userManager.CreateAsync(
+                    user,
+                    model.Password);
 
             if (!result.Succeeded)
             {
                 var errors = string.Join(
                     ", ",
-                    result.Errors.Select(x => x.Description));
+                    result.Errors.Select(
+                        x => x.Description));
 
                 return errors;
             }
 
-            // Assign default Customer role
-            var roleResult = await _userManager.AddToRoleAsync(
-                user,
-                "Customer");
+            var roleResult =
+                await _userManager.AddToRoleAsync(
+                    user,
+                    "Customer");
 
             if (!roleResult.Succeeded)
             {
                 var errors = string.Join(
                     ", ",
-                    roleResult.Errors.Select(x => x.Description));
+                    roleResult.Errors.Select(
+                        x => x.Description));
 
                 return errors;
             }
@@ -79,18 +86,19 @@ namespace Loan_Management_System_Business.Services
         // =========================
         // LOGIN
         // =========================
-        public async Task<LoginResponseDto?> LoginAsync(LoginDto model)
+
+        public async Task<LoginResponseDto?> LoginAsync(
+            LoginDto model)
         {
-            // Find user by email
             var user =
-                await _authRepository.GetUserByEmailAsync(model.Email);
+                await _authRepository
+                    .GetUserByEmailAsync(model.Email);
 
             if (user == null)
             {
                 return null;
             }
 
-            // Check password
             var passwordValid =
                 await _userManager.CheckPasswordAsync(
                     user,
@@ -101,18 +109,16 @@ namespace Loan_Management_System_Business.Services
                 return null;
             }
 
-            // Get user roles
             var roles =
                 await _userManager.GetRolesAsync(user);
 
             var role =
                 roles.FirstOrDefault() ?? "Customer";
 
-            // Generate JWT Token
             var token =
-                await _jwtService.GenerateTokenAsync(user);
+                await _jwtService.GenerateTokenAsync(
+                    user);
 
-            // Return Login Response
             return new LoginResponseDto
             {
                 UserId = user.Id,
@@ -120,7 +126,8 @@ namespace Loan_Management_System_Business.Services
                 Email = user.Email ?? string.Empty,
                 Role = role,
                 Token = token,
-                Expiration = DateTime.UtcNow.AddMinutes(60)
+                Expiration =
+                    DateTime.UtcNow.AddMinutes(60)
             };
         }
 
@@ -128,56 +135,164 @@ namespace Loan_Management_System_Business.Services
         // =========================
         // FORGOT PASSWORD
         // =========================
-        public async Task<string> ForgotPasswordAsync(
-            ForgotPasswordDto model)
-        {
-            var user =
-                await _authRepository.GetUserByEmailAsync(
-                    model.Email);
 
+        public async Task<string> ForgotPasswordAsync(
+     ForgotPasswordDto model)
+        {
+            // 1. Find user by email
+            var user =
+                await _authRepository
+                    .GetUserByEmailAsync(model.Email);
+
+            // 2. Don't reveal whether email exists
             if (user == null)
             {
                 return "If this email is registered, password reset instructions will be sent.";
             }
 
-            // Generate password reset token
+            // 3. Generate password reset token
             var token =
-                await _userManager.GeneratePasswordResetTokenAsync(
-                    user);
+                await _userManager
+                    .GeneratePasswordResetTokenAsync(user);
 
-            // Email service baad me add karenge
-            return token;
+            // 4. Encode token so it can safely travel in URL
+            var encodedToken =
+                Uri.EscapeDataString(token);
+
+            // 5. Create password reset link
+            var resetLink =
+                $"https://localhost:7256/api/Auth/reset-password" +
+                $"?email={Uri.EscapeDataString(model.Email)}" +
+                $"&token={encodedToken}";
+
+            // 6. Email subject
+            var subject =
+                "Loan Management System - Password Reset";
+
+            // 7. Email body
+            var body = $@"
+        <html>
+        <body>
+            <h2>Password Reset Request</h2>
+
+            <p>Hello {user.FullName},</p>
+
+            <p>
+                We received a request to reset your
+                Loan Management System password.
+            </p>
+
+            <p>
+                Click the button below to reset your password:
+            </p>
+
+            <p>
+                <a href='{resetLink}'
+                   style='
+                   display:inline-block;
+                   padding:12px 20px;
+                   background-color:#007bff;
+                   color:white;
+                   text-decoration:none;
+                   border-radius:5px;'>
+                   Reset Password
+                </a>
+            </p>
+
+            <p>
+                If you did not request a password reset,
+                you can safely ignore this email.
+            </p>
+
+            <p>
+                Regards,<br/>
+                Loan Management System
+            </p>
+        </body>j
+        </html>";
+
+            // 8. Send email
+            await _emailService.SendEmailAsync(
+                model.Email,
+                subject,
+                body);
+
+            // 9. Success response
+            return "Password reset instructions have been sent to your email.";
         }
 
+        // =========================
+        // RESET PASSWORD
+        // =========================
 
-        // =========================
-        // CHANGE PASSWORD
-        // =========================
-        public async Task<string> ChangePasswordAsync(
-            string userId,
-            ChangePasswordDto model)
+        public async Task<string> ResetPasswordAsync(
+            ResetPasswordDto model)
         {
-            // Find user
+            // Find user by email
             var user =
-                await _userManager.FindByIdAsync(userId);
+                await _userManager
+                    .FindByEmailAsync(model.Email);
 
             if (user == null)
             {
-                return "User not found.";
+                return "Invalid password reset request.";
             }
 
-            // Change password
+            // Decode token
+            var decodedToken =
+                Uri.UnescapeDataString(model.Token);
+
+            // Reset password
             var result =
-                await _userManager.ChangePasswordAsync(
+                await _userManager.ResetPasswordAsync(
                     user,
-                    model.CurrentPassword,
+                    decodedToken,
                     model.NewPassword);
 
             if (!result.Succeeded)
             {
                 var errors = string.Join(
                     ", ",
-                    result.Errors.Select(x => x.Description));
+                    result.Errors.Select(
+                        x => x.Description));
+
+                return errors;
+            }
+
+            return "Password reset successfully.";
+        }
+
+
+        // =========================
+        // CHANGE PASSWORD
+        // =========================
+
+        public async Task<string> ChangePasswordAsync(
+            string userId,
+            ChangePasswordDto model)
+        {
+            var user =
+                await _userManager
+                    .FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return "User not found.";
+            }
+
+            var result =
+                await _userManager
+                    .ChangePasswordAsync(
+                        user,
+                        model.CurrentPassword,
+                        model.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(
+                    ", ",
+                    result.Errors.Select(
+                        x => x.Description));
 
                 return errors;
             }
